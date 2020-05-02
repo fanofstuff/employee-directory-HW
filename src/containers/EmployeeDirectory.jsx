@@ -109,7 +109,7 @@ class EmployeeDirectory extends Component {
             </div>
           </div>
         </div>
-        <List employees={this.state.employees} />
+        <List employees={this.state.employeeFilter} />
       </>
     );
   }
