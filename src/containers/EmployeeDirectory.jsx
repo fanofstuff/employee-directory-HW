@@ -5,6 +5,8 @@ import List from "../components/EmployeeDirectory/List";
 class EmployeeDirectory extends Component {
   state = {
     employees: [],
+    employeeFilter: [],
+    search: "",
   };
 
   componentDidMount() {
@@ -14,17 +16,46 @@ class EmployeeDirectory extends Component {
   callEmployeeAPI = () => {
     axios
       .get(
-        "https://randomuser.me/api/?seed=foobar&results=25&inc=name,email,dob,phone,picture,id&noinfo"
+        "https://randomuser.me/api/?seed=foobar&results=25&inc=name,email,dob,phone,picture&noinfo"
       )
       .then((response) => {
-        console.log(response.data.results[0]);
         this.setState({
           employees: response.data.results,
+          employeeFilter: response.data.results,
         });
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  clearFilter = () => {
+    this.setState({
+      employeeFilter: this.state.employees,
+      search: "",
+    });
+  };
+
+  handleChange = (event) => {
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value,
+    });
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("HandleSubmit");
+    console.log(this.state.search);
+    const employees = [...this.state.employees];
+    const filteredEmployees = employees.filter((employee) => {
+      const regex = new RegExp(this.state.search, "gi");
+      return employee.email.match(regex);
+    });
+    this.setState({
+      employeeFilter: filteredEmployees,
+    });
+
   };
 
   render() {
@@ -39,20 +70,42 @@ class EmployeeDirectory extends Component {
         <div className="container-fluid p-3 bg-light">
           <div className="row">
             <div className="col">
-              <form className="form-inline md-form mb-4">
-                <input
-                  className="form-control mr-sm-2"
-                  type="text"
-                  placeholder="Search"
-                  aria-label="Search"
-                />
-                <button
-                  className="btn aqua-gradient btn-rounded btn-sm my-0"
-                  type="submit"
-                >
-                  Search
-                </button>
+              <form
+                className="form-inline md-form mb-4"
+                onSubmit={this.handleSubmit}
+              >
+                <div className="row">
+                  <div className="col-sm-10">
+                    <div className="form-group">
+                      <input
+                        className="form-control"
+                        type="text"
+                        placeholder="Filter Employees by Email"
+                        name="search"
+                        value={this.state.search}
+                        onChange={this.handleChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-sm-2">
+                    <button
+                      className="btn btn-primary btn-rounded btn-sm my-0"
+                      type="submit"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
               </form>
+              {this.state.employees.length !==
+                this.state.employeeFilter.length && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={this.clearFilter}
+                >
+                  Clear Filter
+                </button>
+              )}
             </div>
           </div>
         </div>
