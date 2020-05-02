@@ -45,8 +45,6 @@ class EmployeeDirectory extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    console.log("HandleSubmit");
-    console.log(this.state.search);
     const employees = [...this.state.employees];
     const filteredEmployees = employees.filter((employee) => {
       const regex = new RegExp(this.state.search, "gi");
@@ -55,27 +53,45 @@ class EmployeeDirectory extends Component {
     this.setState({
       employeeFilter: filteredEmployees,
     });
+  };
 
+  handleSortASC = (event) => {
+    event.preventDefault();
+    const employees = [...this.state.employeeFilter];
+    function compare(a, b) {
+      const A = a.name.first.toUpperCase();
+      const B = b.name.first.toUpperCase();
+
+      let comparison = 0;
+      if (A > B) {
+        comparison = 1;
+      } else if (A < B) {
+        comparison = -1;
+      }
+      return comparison;
+    }
+    const sortedEmployees = employees.sort(compare);
+    this.setState({
+      employeeFilter: sortedEmployees,
+    });
   };
 
   render() {
     return (
       <>
-        <div className="jumbotron bg-dark text-white text-center mb-0">
+        <div className="jumbotron jumbotron-fluid bg-dark text-white text-center mb-0">
           <h1>Employee Directory</h1>
           <p>
             Click on the search bar below to filter results by (Email Address).
           </p>
+          <p>Click on the (Name) header to sort by first name, A to Z.</p>
         </div>
-        <div className="container-fluid p-3 bg-light">
+        <div className="container p-3 bg-light">
           <div className="row">
             <div className="col">
-              <form
-                className="form-inline md-form mb-4"
-                onSubmit={this.handleSubmit}
-              >
+              <form className="md-form m-4" onSubmit={this.handleSubmit}>
                 <div className="row">
-                  <div className="col-sm-10">
+                  <div className="col m-1">
                     <div className="form-group">
                       <input
                         className="form-control"
@@ -87,29 +103,32 @@ class EmployeeDirectory extends Component {
                       />
                     </div>
                   </div>
-                  <div className="col-sm-2">
+                  <div className="col m-2">
                     <button
-                      className="btn btn-primary btn-rounded btn-sm my-0"
+                      className="btn btn-primary btn-rounded btn-sm mx-2"
                       type="submit"
                     >
                       Search
                     </button>
+                    {this.state.employees.length !==
+                      this.state.employeeFilter.length && (
+                      <button
+                        className="btn btn-danger mx-2"
+                        onClick={this.clearFilter}
+                      >
+                        Clear Filter
+                      </button>
+                    )}
                   </div>
                 </div>
               </form>
-              {this.state.employees.length !==
-                this.state.employeeFilter.length && (
-                <button
-                  className="btn btn-secondary"
-                  onClick={this.clearFilter}
-                >
-                  Clear Filter
-                </button>
-              )}
             </div>
           </div>
+          <List
+            employees={this.state.employeeFilter}
+            handleSort={this.handleSortASC}
+          />
         </div>
-        <List employees={this.state.employeeFilter} />
       </>
     );
   }
